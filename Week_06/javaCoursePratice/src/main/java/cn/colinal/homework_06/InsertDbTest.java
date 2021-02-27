@@ -1,6 +1,24 @@
-### 插入100w条数据方式展示
-1. 使用拼接整个sql的方式多value插入数据
-```java
+package cn.colinal.homework_06;
+
+import java.sql.*;
+
+public class InsertDbTest {
+
+    private static int FOR_INDEX = 0;
+
+    private static StringBuilder sqlSB;
+
+    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        // 加载MySQL驱动
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        String password = "123456";
+        String user = "root";
+        String url = "jdbc:mysql://localhost:3305/colinalDB?characterEncoding=UTF8";
+        long startTimeMills = System.currentTimeMillis();
+        Connection connection = DriverManager.getConnection(url, user, password);
+
+        sqlSB = new StringBuilder();
+        // 1. 拼接方式 100w一次的8817ms 10w一次8472ms 1w一次9465ms
         sqlSB.append("insert into ES_USER(userId,username,displayName)values(" + FOR_INDEX++ + ",\"张三" + FOR_INDEX + "\",\"张先生" + FOR_INDEX + "\")");
         while (FOR_INDEX < 100_0001) {
             sqlSB.append(",(" + FOR_INDEX++ + ",\"张三" + FOR_INDEX + "\",\"张先生" + FOR_INDEX + "\")");
@@ -12,16 +30,10 @@
             }
         }
         System.out.println("type 1 time keep:" + (System.currentTimeMillis() - startTimeMills));
-```
-*结果如下*：
-一次提交数量对应的时长大致为：
-+ 100w: 8817ms 
-+ 10w: 8472ms 
-+ 1w: 9465ms
+        reset(connection);
 
-2. 参数方式批量提交，关闭自动提交
-```java
-connection.setAutoCommit(false);
+        // 2. 参数方式批量提交，关闭自动提交 太久了，没跑完
+        connection.setAutoCommit(false);
         sqlSB.append("insert into ES_USER(userId,username,displayName)values(?,?,?)");
         PreparedStatement statement2 = connection.prepareStatement(sqlSB.toString());
         while (FOR_INDEX++ < 100_0001) {
@@ -35,13 +47,11 @@ connection.setAutoCommit(false);
             }
         }
         System.out.println("type 2 time keep:" + (System.currentTimeMillis() - startTimeMills));
-```
-*结果展示*：
-时长超过100s
+        reset(connection);
 
-3. 参数方式加参数拼接
-```java
-connection.setAutoCommit(false);
+
+        // 3. 参数方式加参数拼接，1000提交18211ms 1w提交12554ms 10w提交17677ms
+//        connection.setAutoCommit(false);
         sqlSB.append("insert into ES_USER(userId,username,displayName)values");
         int count = 0;
         int commitCount = 10000;
@@ -62,15 +72,16 @@ connection.setAutoCommit(false);
                 statement3.executeUpdate();
                 sqlSB = new StringBuilder();
                 sqlSB.append("insert into ES_USER(userId,username,displayName)values");
-                connection.commit();
+//                connection.commit();
             }
         }
         System.out.println("type 3 time keep:" + (System.currentTimeMillis() - startTimeMills));
-```
-*结果展示*：
-一次提交数量对应的时长大致为：
+    }
 
-+ 1000：18211ms 
-+ 1w：12554ms 
-+ 10w：17677ms
-
+    private static void reset(Connection connection) throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.execute("truncate table ES_USER ");
+        sqlSB = new StringBuilder();
+        FOR_INDEX = 0;
+    }
+}
