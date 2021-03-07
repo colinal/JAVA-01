@@ -1,0 +1,35 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    dynamic:
+      datasource:
+        db1: #数据源1
+          username: root
+          password:
+          jdbc-url: jdbc:mysql://localhost:3316/db?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+          driver-class-name: com.mysql.jdbc.Driver
+        db2: #数据源2
+          username: root
+          password:
+          jdbc-url: jdbc:mysql://localhost:3326/db?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+          driver-class-name: com.mysql.jdbc.Driver
+      primary: db1
+
+mybatis:
+  mapper-locations: classpath:config/homework_07/mapper/db1/*.xml
+  type-aliases-package: cn.colinal.homework_07.entity
+
+mybatis-plus:
+  executor-type: simple
+
+#showSql
+logging:
+  level:
+    cn.colinal.homework_07: debug
+    org.springframework.web: debug
+    org.springframework.data: debug
+    com:
+      example:
+        mapper : debug
