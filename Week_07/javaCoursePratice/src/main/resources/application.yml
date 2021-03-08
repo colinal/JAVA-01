@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    dynamic:
+      primary: db1
+      datasource:
+        db1:
+          username: root
+          password:
+          url: jdbc:mysql://localhost:3316/db?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
+        db2:
+          username: root
+          password:
+          url: jdbc:mysql://localhost:3326/db?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false&serverTimezone=UTC
+logging:
+  level:
+    com.baomidou: debug

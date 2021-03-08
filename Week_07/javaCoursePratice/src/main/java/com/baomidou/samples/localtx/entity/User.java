@@ -1,4 +1,4 @@
-package cn.colinal.homework_07.entity;
+package com.baomidou.samples.localtx.entity;
  
 public class User {
     private Integer id;
